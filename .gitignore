@@ -1,0 +1,12 @@
+# IDE config
+.idea/
+.vscode/
+
+# Reports
+reports/
+
+# File with device id
+ZY223FFP4M
+
+# Frozen packages
+calabash_*/Gemfile.lock

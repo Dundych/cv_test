@@ -1,0 +1,2 @@
+schedule==0.5.0
+opencv-python==3.4.2.17
