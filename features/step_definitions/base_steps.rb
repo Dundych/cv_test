@@ -35,13 +35,28 @@ Then(/^I wait (\d+) seconds$/) do |seconds|
   sleep seconds
 end
 
-Then(/^I wait (\d+) seconds to (\d+) template(?:s)? "([^"]*)" exist on the screen(, use strict comparison)?$/) do |timeout, expected_occurrences, template_name, is_strict|
+Then(/^I wait (\d+) seconds to (\d+) object(?:s)? "([^"]*)" exist on the screen?$/) do |timeout, expected_occurrences, query_image_name|
+  expected_occurrences = expected_occurrences.to_i
+  query_image_name = query_image_name.to_s.downcase
+
+  query_image_file_path = eval_query_name_str_to_file_path(query_image_name)
+  occurrences = wait_objects_on_the_screen(expected_occurrences, query_image_file_path, timeout)["rectangle_centers"].size.to_i
+
+  assert_true_custom(occurrences == expected_occurrences,
+                     "During #{timeout}s, found '#{occurrences}' occurrences objects '#{File.basename(query_image_file_path)}' on the screen." +
+                         " But expected '#{expected_occurrences}'. Check report folder '#{@report_path}' to details.")
+end
+
+Then(/^I wait for object "([^"]*)" on the screen$/) do |query_name|
+  step %Q{I wait 30 seconds to 1 object "#{query_name}" exist on the screen}
+end
+
+Then(/^I wait (\d+) seconds to (\d+) template(?:s)? "([^"]*)" exist on the screen?$/) do |timeout, expected_occurrences, template_name|
   expected_occurrences = expected_occurrences.to_i
   template_name = template_name.to_s.downcase
 
   template_file_path = eval_template_name_str_to_file_path(template_name)
-  threshold = is_strict ? 0.9 : 'dynamic'
-  occurrences = wait_templates_on_the_screen(expected_occurrences, template_file_path, timeout, threshold)["point_clouds"].to_i
+  occurrences = wait_templates_on_the_screen(expected_occurrences, template_file_path, timeout)["point_clouds"].to_i
 
   assert_true_custom(occurrences == expected_occurrences,
                      "During #{timeout}s, found '#{occurrences}' occurrences templates '#{File.basename(template_file_path)}' on the screen." +

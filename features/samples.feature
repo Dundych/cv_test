@@ -15,7 +15,7 @@ Feature: CV Samples
     And I tap on template "gmaps empty search field"
     When I enter text "Intellias Kyrylivska 39"
     And I tap on template "gboard search btn"
-    Then I wait 20 seconds to 1 template "gmaps location intellias kyrylivska 39" exist on the screen, use strict comparison
+    Then I wait 20 seconds to 1 object "location intellias kyrylivska 39" exist on the screen
 
   @location
   @failed
@@ -32,5 +32,4 @@ Feature: CV Samples
     And I tap on template "gmaps empty search field"
     When I enter text "Intellias Kyrylivska 15/1"
     And I tap on template "gboard search btn"
-    Then I wait 20 seconds to 1 template "gmaps location intellias kyrylivska 39" exist on the screen, use strict comparison
-
+    Then I wait 20 seconds to 1 object "location intellias kyrylivska 39" exist on the screen

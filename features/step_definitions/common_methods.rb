@@ -97,20 +97,30 @@ def take_screenshot_faster(screenshot_path = File.join(@report_path, "screenshot
   return screenshot_path
 end
 
+def eval_name_str_to_file_path(path_to_folder, obj_with_pathes, name_str)
+  logc("method: #{__method__}, params: #{obj_with_pathes}, #{obj_with_pathes}, #{name_str}")
+
+  assert_true_custom(obj_with_pathes.has_key?(name_str),
+                     "Can't get file name, obj #{obj_with_pathes} has no key '#{name_str}'.")
+
+  file_path_without_ext = File.join(path_to_folder, obj_with_pathes[name_str])
+
+  file_paths = Dir["#{file_path_without_ext}*"]
+  assert_false_custom(file_paths.empty?, "Cant find any file in path '#{file_path_without_ext}'")
+
+  file_path = file_paths.first
+
+  return file_path
+end
+
 def eval_template_name_str_to_file_path(template_name)
   logc("method: #{__method__}, params: #{template_name}")
+  return eval_name_str_to_file_path(PATH_TEMPLATES, TEMPLATES, template_name)
+end
 
-  assert_true_custom(TEMPLATES.has_key?(template_name),
-                     "Can't get template file name, template obj #{TEMPLATES} has no key '#{template_name}'.")
-
-  template_file_path_without_ext = File.join(PATH_TEMPLATES, TEMPLATES[template_name])
-
-  template_file_paths = Dir["#{template_file_path_without_ext}*"]
-  assert_false_custom(template_file_paths.empty?, "Cant find any template image in path '#{template_file_path_without_ext}'")
-
-  template_file_path = template_file_paths.first
-
-  return template_file_path
+def eval_query_name_str_to_file_path(query_image_name)
+  logc("method: #{__method__}, params: #{query_image_name}")
+  return eval_name_str_to_file_path(PATH_QUERY_IMAGES, QUERY_IMAGES, query_image_name)
 end
 
 
@@ -132,7 +142,7 @@ def prepare_screenshot(screenshot_name = "screenshot.png", is_remove_previous = 
   return $screenshot_file_path
 end
 
-# Exec python script 'find_objs_on_img.py' to get info about occurrence template on image
+# Exec python script 'find_templates_on_img.py' to get info about occurrence template on image
 # @Param: [String] 'template_path' - full path to template image
 # @Param: [String] 'image_path' - full path to main image
 # @Param: [String] 'output_path' - path to save result image. Default is '' (result won't saved)
@@ -146,13 +156,13 @@ end
 #                        "point_clouds" => 1,
 #                        "point_clouds_coords" => [[440, 523]]
 #                        "rectangle_centers" => [[640, 723]]}
-def find_objs_on_img(template_path, image_path, output_path = '', threshold = 0.65)
+def find_templates_on_img(template_path, image_path, output_path = '', threshold = 0.8)
   logc("method: #{__method__}, params: '#{template_path}', #{image_path}, #{output_path}, #{threshold}")
 
   ts = Time.now
 
   # Create shell command to execute
-  shell_command = "python #{File.join(PATH_SCRIPTS, "find_objs_on_img.py")} -t '#{template_path}' -i '#{image_path}' -r #{threshold}"
+  shell_command = "python #{File.join(PATH_SCRIPTS, "find_templates_on_img.py")} -t '#{template_path}' -i '#{image_path}' -r #{threshold}"
   shell_command += " -o '#{output_path}'" unless output_path.to_s.empty?
 
   logc("Exec python script:\n     #{shell_command}")
@@ -161,7 +171,7 @@ def find_objs_on_img(template_path, image_path, output_path = '', threshold = 0.
   shell_exec_status = $?.success?
 
   assert_true_custom(shell_exec_status,
-                     "Execution 'find_objs_on_img.py' fail. Shell_exec_result: #{shell_exec_result}")
+                     "Execution 'find_templates_on_img.py' fail. Shell_exec_result: #{shell_exec_result}")
 
   logc("Result of exec python script:\n     #{shell_exec_result}")
 
@@ -242,7 +252,8 @@ def find_objs_on_img(template_path, image_path, output_path = '', threshold = 0.
   return res_hash
 end
 
-# Exec method 'find_objs_on_img', check result, and calculate threshold value to reduce noise,
+# Obsolete
+# Exec method 'find_templates_on_img', check result, and calculate threshold value to reduce noise,
 #   and 1-st (false positives) 2-nd (true negatives) kind errors.
 #   We assume, that:
 #     - image does not contains templates if method found '0' templates with 'threshold' ~ '0.6',
@@ -252,8 +263,8 @@ end
 # @Param: [String] 'template_path' - full path to template image
 # @Param: [String] 'image_path' - full path to main image
 # @Param: [String] 'output_path' - path to save result image. Default is '' (result won't saved)
-# @Return: [Hash] 'res' find_objs_on_img
-def find_objs_on_img_with_dynamic_threshold(template_path, image_path, output_path = '')
+# @Return: [Hash] 'res' find_templates_on_img
+def xxx_find_templates_on_img_with_dynamic_threshold(template_path, image_path, output_path = '')
   logc("method: #{__method__}, params: '#{template_path}', #{image_path}, #{output_path}")
 
   ts = Time.now
@@ -268,7 +279,7 @@ def find_objs_on_img_with_dynamic_threshold(template_path, image_path, output_pa
   accepted_density = 80.0
 
 
-  res = find_objs_on_img(template_path, image_path, output_path)
+  res = find_templates_on_img(template_path, image_path, output_path)
 
   # case of 'not found'
   # decrease threshold to ensure that image does not contains templates or find templates
@@ -291,7 +302,7 @@ def find_objs_on_img_with_dynamic_threshold(template_path, image_path, output_pa
         break
       end
 
-      res = find_objs_on_img(template_path, image_path, nil, next_threshold)
+      res = find_templates_on_img(template_path, image_path, nil, next_threshold)
       if res["found"] != 0
         logc("Found '#{res["found"]}' templates on the screen with threshold '#{next_threshold}'" +
                  " Exit from 'decreasing threshold' cycle to function to find accepted level of density")
@@ -337,7 +348,7 @@ def find_objs_on_img_with_dynamic_threshold(template_path, image_path, output_pa
         break
       end
 
-      res = find_objs_on_img(template_path, image_path, nil, next_threshold)
+      res = find_templates_on_img(template_path, image_path, nil, next_threshold)
 
       if res["point_clouds"].to_s.empty?
         calculated_threshold = previous_threshold
@@ -364,22 +375,22 @@ def find_objs_on_img_with_dynamic_threshold(template_path, image_path, output_pa
     logc("Template with calculated threshold is already found and saved in 'res' variable. Return it")
   else
     # get result with calculated threshold
-    res = find_objs_on_img(template_path, image_path, output_path, calculated_threshold)
+    res = find_templates_on_img(template_path, image_path, output_path, calculated_threshold)
   end
 
   return res
 end
-
+# Obsolete
 # Take screenshot get number of occurrence template on it (calculate and use dynamic threshold)
 # @Param: [String] template_path - full path to template image
 # @Param: [String] output_path - path to save result image. Default is '' (result won't saved)
 # @Return: [Hash] res_of_finding
-def find_templates_on_the_screen(template_path, output_file_path = '')
+def xxx_find_templates_on_the_screen(template_path, output_file_path = '')
   logc("method: #{__method__}, params: '#{template_path}', #{output_file_path}")
 
   screenshot_path = prepare_screenshot("screenshot.png", true, false)
 
-  res_of_finding = find_objs_on_img_with_dynamic_threshold(template_path, screenshot_path, output_file_path)
+  res_of_finding = find_templates_on_img_with_dynamic_threshold(template_path, screenshot_path, output_file_path)
 
   return res_of_finding
 end
@@ -389,12 +400,12 @@ end
 # @Param: [String] output_path - path to save result image. Default is '' (result won't saved)
 # @Param: [Float] threshold - Threshold ratio
 # @Return: [Hash] res_of_finding
-def find_templates_on_the_screen_strict_threshold(template_path, output_file_path = '', threshold = 0.65)
+def find_templates_on_the_screen(template_path, output_file_path = '', threshold = 0.8)
   logc("method: #{__method__}, params: '#{template_path}', #{output_file_path}, '#{threshold}',")
 
   screenshot_path = prepare_screenshot("screenshot.png", true, false)
 
-  res_of_finding = find_objs_on_img(template_path, screenshot_path, output_file_path, threshold)
+  res_of_finding = find_templates_on_img(template_path, screenshot_path, output_file_path, threshold)
 
   return res_of_finding
 end
@@ -403,11 +414,10 @@ end
 # @Param: [Number] 'expected_num_templates_on_screen'
 # @Param: [String] 'template_path'
 # @Param: [Int] 'timeout' in sec
-# @Param: [Float| String] 'threshold_value'. devfault is 'dynamic' ('find_templates_on_the_screen' will be used),
-#     else - find_templates_on_the_screen_strict_threshold will be used
+# @Param: [Float] 'threshold_value'.
 # @Param: [Bool] 'take_res_if_expect_fail'
 # @Return: [Hash] res_of_finding
-def wait_templates_on_the_screen(expected_num_templates_on_screen, template_path, timeout = 20, threshold_value = 'dynamic', take_res_if_expect_fail = true)
+def wait_templates_on_the_screen(expected_num_templates_on_screen, template_path, timeout = 20, threshold_value = 0.8, take_res_if_expect_fail = true)
   logc("method: #{__method__}, params: #{expected_num_templates_on_screen}, #{template_path}," + 
     " #{timeout}, #{threshold_value} #{take_res_if_expect_fail}")
 
@@ -427,11 +437,7 @@ def wait_templates_on_the_screen(expected_num_templates_on_screen, template_path
   while true
     attempt_time = Time.now
     logc("Attempt: '#{attempt_counter}', time: #{attempt_time}")
-    if threshold_value == 'dynamic'
-      res_of_finding = find_templates_on_the_screen(template_path, res_image_path)
-    else
-      res_of_finding = find_templates_on_the_screen_strict_threshold(template_path, res_image_path, threshold_value)
-    end
+    res_of_finding = find_templates_on_the_screen(template_path, res_image_path, threshold_value)
     occurrences = res_of_finding["point_clouds"].to_i
 
     if (occurrences == expected_num_templates_on_screen) || (attempt_time > time_end)
@@ -448,6 +454,108 @@ def wait_templates_on_the_screen(expected_num_templates_on_screen, template_path
   logc("Occurrences found: #{occurrences}\n     Time spent to wait expected result: #{Time.now - time_start}")
 
   is_expectation_reached = (occurrences == expected_num_templates_on_screen)
+  # remove_file_if_exist(res_image_path) if is_expectation_reached || !take_res_if_expect_fail
+
+  return res_of_finding
+end
+
+# Exec python script 'find_obj_on_img.py' to get info about occurrence objects on image
+# @Param: [String] 'query_image_path' - full path to query image
+# @Param: [String] 'image_path' - full path to main image
+# @Param: [String] 'output_path' - path to save result image. Default is '' (result won't saved)
+# @Return: [Hash] 'res' {"rectangle_centers" => [[640, 723]]}
+def find_objects_on_img(query_image_path, image_path, output_path = '')
+  logc("method: #{__method__}, params: '#{query_image_path}', #{image_path}, #{output_path}")
+
+  ts = Time.now
+
+  # Create shell command to execute
+  shell_command = "python #{File.join(PATH_SCRIPTS, "find_objs_on_img.py")} -q '#{query_image_path}' -t '#{image_path}'"
+  shell_command += " -o '#{output_path}'" unless output_path.to_s.empty?
+
+  logc("Exec python script:\n     #{shell_command}")
+
+  shell_exec_result = `#{shell_command}`
+  shell_exec_status = $?.success?
+
+  assert_true_custom(shell_exec_status,
+                     "Execution 'find_objs_on_img.py' fail. Shell_exec_result: #{shell_exec_result}")
+
+  logc("Result of exec python script:\n     #{shell_exec_result}")
+
+
+  res_hash = {"rectangle_centers" => nil}
+
+  # Parse output to get 'rectangle_centers'
+  match_rectangle_centers = shell_exec_result.match(/^Accepted rectangle centers: '\[(.*?)\]'\..*$/)
+  assert_false_custom(match_rectangle_centers.nil?,
+                      "Script should always output 'Accepted rectangle centers'.")
+  res_hash["rectangle_centers"] = match_rectangle_centers.captures.first.gsub('),',');').split('; ').map {|s| s.gsub(/\((\d+), (\d+)\)/, '\1, \2').split(', ')}
+
+
+  logc("Finding object on image took: #{(Time.now - ts)}s")
+  logc("Return value: #{res_hash}")
+
+  return res_hash
+end
+
+# Take screenshot get number of occurrence query object on it
+# @Param: [String] query_image_path - full path to query image
+# @Param: [String] output_path - path to save result image. Default is '' (result won't saved)
+# @Return: [Hash] res_of_finding
+def find_objects_on_the_screen(query_image_path, output_file_path = '')
+  logc("method: #{__method__}, params: '#{query_image_path}', #{output_file_path}")
+
+  screenshot_path = prepare_screenshot("screenshot.png", true, false)
+
+  res_of_finding = find_objects_on_img(query_image_path, screenshot_path, output_file_path)
+
+  return res_of_finding
+end
+
+# Wait until screen will contains 'expected_num_objects_on_screen' or timeout is reached
+# @Param: [Number] 'expected_num_objects_on_screen'
+# @Param: [String] 'query_image_path'
+# @Param: [Int] 'timeout' in sec
+# @Param: [Bool] 'take_res_if_expect_fail'
+# @Return: [Hash] res_of_finding
+def wait_objects_on_the_screen(expected_num_objects_on_screen, query_image_path, timeout = 20, take_res_if_expect_fail = true)
+  logc("method: #{__method__}, params: #{expected_num_objects_on_screen}, #{query_image_path}," + 
+    " #{timeout}, #{take_res_if_expect_fail}")
+
+  time_start = Time.now
+  time_end = time_start + timeout.to_i
+  logc("Checking will be ended at '#{time_end}'")
+
+  res_image_path = File.join(@report_path,
+                             "#{@scenario_name.to_s.gsub(" ", "_").downcase}" +
+                             "_result_find_object_" +
+                             "#{File.basename(query_image_path)}")
+
+  #wait for time_end reached OR expectation reached
+  res_of_finding = nil
+  occurrences = nil
+  attempt_counter = 1
+  while true
+    attempt_time = Time.now
+    logc("Attempt: '#{attempt_counter}', time: #{attempt_time}")
+    res_of_finding = find_objects_on_the_screen(query_image_path, res_image_path)
+    occurrences = res_of_finding["rectangle_centers"].size.to_i
+
+    if (occurrences == expected_num_objects_on_screen) || (attempt_time > time_end)
+      break
+    else
+      attempt_counter += 1
+      sleep 1
+    end
+  end
+
+  assert_false_custom(occurrences.nil? || res_of_finding.nil?,
+     "Error: object occurrences or res_of_finding on image can't be nil. Check find method")
+
+  logc("Occurrences found: #{occurrences}\n     Time spent to wait expected result: #{Time.now - time_start}")
+
+  is_expectation_reached = (occurrences == expected_num_objects_on_screen)
   # remove_file_if_exist(res_image_path) if is_expectation_reached || !take_res_if_expect_fail
 
   return res_of_finding
@@ -486,7 +594,7 @@ def tap_template_on_the_screen(template_path, template_index, is_raise_error_if_
     end
   end
 
-  remove_file_if_exist(res_image_path) if is_possible_to_tap_template || !take_res_if_find_fail
+  # remove_file_if_exist(res_image_path) if is_possible_to_tap_template || !take_res_if_find_fail
 
 end
 
