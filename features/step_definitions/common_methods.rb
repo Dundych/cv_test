@@ -380,6 +380,7 @@ def xxx_find_templates_on_img_with_dynamic_threshold(template_path, image_path, 
 
   return res
 end
+
 # Obsolete
 # Take screenshot get number of occurrence template on it (calculate and use dynamic threshold)
 # @Param: [String] template_path - full path to template image

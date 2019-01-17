@@ -70,8 +70,8 @@ h, w = query.shape[:2] # Size of query (note! that collumns and rows switched in
 #  Radius is a distanse between points to decide that template matches are equal. Use as radius 50% of min side of query
 radius = min([h, w]) * 0.5
 #  Offset is value that used to deside if matched points has the same coords in query and croped image.
-#    It is  20% of radius of point sparsing
-offset = radius * 0.2
+#    It is  50% of radius of point sparsing
+offset = radius * 0.5
 
 #  Find matches and select results above threshold
 result = cv2.matchTemplate(image, query, cv2.TM_CCOEFF_NORMED) # Use 'normed' method to easy choose a threshold from 0 to 1
@@ -92,6 +92,7 @@ bf = cv2.BFMatcher()
 #    Convert query and image to gray
 query_gray = cv2.cvtColor(query,cv2.COLOR_BGR2GRAY)
 image_gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
+
 #    Loop memory
 res_img = np.zeros((0, 0, 3), np.uint8) # cross loop image to save result
 
@@ -102,7 +103,8 @@ res_img = np.zeros((0, 0, 3), np.uint8) # cross loop image to save result
 #     'common_good_matches': common_good_matches
 # }
 accepted_points = [] # points to keep. list with dict
-# loop to match
+rejected_points = [] # points to reject. list with dict
+#    Loop to match
 for pt in sparsed_points:
     # Crop image (note! remember - sparsed points is (x,y) but crop function gets args (y:len,x:len))
     crop_img = image_gray[pt[1]:pt[1] + h, pt[0]:pt[0] + w]
@@ -132,23 +134,25 @@ for pt in sparsed_points:
         if is_x_matching_within_offset and is_y_matching_within_offset: 
             common_good_matches.append(good_match)
 
-    # Make decision.
+    # Make decision. and save result to list
     # To keep sparsed point - We should have at least 3 common points and more or equal than half of good matches
+    res_dict = {
+                    'point': pt,
+                    'matches': matches,
+                    'good_matches': good_matches,
+                    'common_good_matches': common_good_matches
+                }
     if len(common_good_matches) >= 3 and len(common_good_matches) >= len(good_matches)*0.55:
-        res_dict = {
-                        'point': pt,
-                        'matches': matches,
-                        'good_matches': good_matches,
-                        'common_good_matches': common_good_matches
-                    }
         accepted_points.append(res_dict)
+    else:
+        rejected_points.append(res_dict)
 
     # Draw black frame on images for visual separation
     cv2.rectangle(img1, (0, 0), img1.shape[:2][::-1], (0, 0, 0), 2)
     cv2.rectangle(img2, (0, 0), img2.shape[:2][::-1], (0, 0, 0), 2)
     # Draw good matches to img
     img3 = cv2.drawMatches(img1, kp1, img2, kp2, good_matches, None, flags=2)
-    # Draw first COMMON_MATCHES_POINTS_LEN  common good matches to img
+    # Draw common good matches to img
     img4 = cv2.drawMatches(img1, kp1, img2, kp2, common_good_matches, None, flags=2)
 
     # Add images to result
@@ -174,11 +178,16 @@ print( "Done with processing query image '{0}' on train image '{1}'.".format(os.
 print( "Threshold: '{0}'. Radius: '{1}'. Offset: '{2}'.".format(threshold, radius, offset) )
 print( "Draft points found: '{0}'. first 10 points: '{1}'".format(len(points), points[:10]) )
 print( "Clouds found: '{0}'. points: '{1}'".format(len(sparsed_points), sparsed_points) )
-print( "Accepted points found: '{0}'. Matches details:'{1}'.".format(
+print( "Accepted points: '{0}'. Details:'{1}'.".format(
             len(accepted_points),
             [ { 'mtc': len(point_dict['matches']),
                 'gd': len(point_dict['good_matches']),
                 'cmn': len(point_dict['common_good_matches'])} for point_dict in accepted_points ]))
+print( "Rejected points: '{0}'. Details:'{1}'.".format(
+            len(rejected_points),
+            [ { 'mtc': len(point_dict['matches']),
+                'gd': len(point_dict['good_matches']),
+                'cmn': len(point_dict['common_good_matches'])} for point_dict in rejected_points ]))
 print( "Accepted rectangle centers: '{0}'.".format(accepted_rectangle_centers) )
 
 # Save result to file if 'output' param provided

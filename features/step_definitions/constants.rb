@@ -32,7 +32,7 @@ unless defined? LAST_CONSTANT
   ### Query images
   QUERY_IMAGES = {
   "location intellias kyrylivska 39" => "location_intellias_kyrylivska_39",
-}
+  }
 
   ### KEEP LAST
   LAST_CONSTANT = 'Last Constant Initialized - KEEP THIS CONSTANT LAST'
