@@ -59,8 +59,8 @@ for pt in points:
     cv2.rectangle(image, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
     vals.append(result[pt[1]][pt[0]])
 
-#  Radius is a distanse between points to deside that points are equal. Use as radius 90% of min side of template
-radius = min([h, w]) * 0.9
+#  Radius is a distanse between points to deside that points are equal. Use as radius 50% of min side of template
+radius = min([h, w]) * 0.5
 sparsed_points = sparse_subset(points, radius)
 
 #  Draw blue rectangle on matched templates, find centers of the rectangles. Draw small sircles on the centers
@@ -85,5 +85,5 @@ if len(vals) > 0:
 # Save result to file if 'output' param provided
 if not output_path == None:
     cv2.imwrite(output_path, image)
-    # cv2.imwrite("res{0}.png".format(datetime.now().strftime('%Y%m%dT%H%M%S')),result)
+    # cv2.imwrite("{0}/res{1}.png".format(os.path.dirname(output_path),datetime.now().strftime('%Y%m%dT%H%M%S')),cv2.normalize(result, None, 0, 255, norm_type=cv2.NORM_MINMAX))
     print( "Result image with located template saved in '{0}'.".format(output_path) )

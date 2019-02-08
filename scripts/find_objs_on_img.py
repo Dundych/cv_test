@@ -43,7 +43,7 @@ def concatenate_cv2_images(img1, img2, axis=0):
 
 # Parse arguments
 ap = argparse.ArgumentParser(description='Script to get number of occurrence template on image with additional checks.' +
-                            ' Feture detection and matching used for making final decision.')
+                            ' Feature detection and matching used for making final decision.')
 ap.add_argument('-q', '--query', required=True, help='Query image path. Path to query image')
 ap.add_argument('-t', '--train', required=True, help='Train image path. Path to train image')
 ap.add_argument('-r', '--ratio', default=0.65, type=float, help='Threshold ratio (0.01 - 1) Default 0.65 is a good value to start with,' +
