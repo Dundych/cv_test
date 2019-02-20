@@ -20,7 +20,11 @@ $ cucumber features -v -t @cur DEVICE_ID=ZY223FFP4M
 - OR test any image manually
 
 ```sh
-$ python scripts/find_objs_on_img.py -t <template.png> -i <image.png> -o <result.png>
+$ python scripts/find_templates_on_img.py -t <template.png> -i <image.png> -o <result.png>
+```
+
+```sh
+$ python scripts/find_objs_on_img.py -q <query.png> -t <train.png> -o <result.png>
 ```
 
 ## Docker
