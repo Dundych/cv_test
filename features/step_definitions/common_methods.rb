@@ -7,14 +7,14 @@ require 'uri'
 
 
 def assert_false_custom(expression, msg = 'Failure')
-  logc("method: '#{__method__}', params: '#{expression}', '#{msg[0, 10]}...'")
+  logc("method: '#{__method__}', params: '#{expression}', '#{msg[0, 50]}...'")
   if expression
     fail(msg)
   end
 end
 
 def assert_true_custom(expression, msg = 'Failure')
-  logc("method: '#{__method__}', params: '#{expression}', '#{msg[0, 10]}...'")
+  logc("method: '#{__method__}', params: '#{expression}', '#{msg[0, 50]}...'")
   unless expression
     fail(msg)
   end
@@ -411,6 +411,23 @@ def find_templates_on_the_screen(template_path, output_file_path = '', threshold
   return res_of_finding
 end
 
+# Get number of templates on the screen, save result image. (Right now, without wait)
+# @Param: [String] template_path - full path to template image
+# @Param: [Float] threshold - Threshold ratio
+# @Return: [Hash] res_of_finding, res_image_path
+def get_templates_on_the_screen(template_path, threshold = 0.8)
+  logc("method: #{__method__}, params: '#{template_path}', '#{threshold}',")
+
+  res_image_path = File.join(@report_path,
+    "#{@scenario_name.to_s.gsub(" ", "_").downcase}" +
+    "_result_find_template_" +
+    "#{File.basename(template_path)}")
+
+  res_of_finding = find_templates_on_the_screen(template_path, res_image_path, threshold)
+
+  return res_of_finding, res_image_path
+end
+
 # Wait until screen will contains 'expected_num_templates_on_screen' or timeout is reached
 # @Param: [Number] 'expected_num_templates_on_screen'
 # @Param: [String] 'template_path'
@@ -611,27 +628,28 @@ def swipes_to_template_on_the_screen(template_path, direction = "down", max_swip
 
   #wait for swipes numbers reached OR expectation reached
   res_of_finding = nil
+  res_image_path = nil
   occurrences = nil
+  is_expectation_reached = false
   attempt_counter = 1
-  expected_occurrences = 1
   while true
     logc("Attempt: '#{attempt_counter}'")
-    res_of_finding = wait_templates_on_the_screen(expected_occurrences, template_path, 10)
+    res_of_finding, res_image_path = get_templates_on_the_screen(template_path, 0.85)
     occurrences = res_of_finding["point_clouds"].to_i
+    is_expectation_reached = occurrences > 0
 
-    if (occurrences == expected_occurrences) || (attempt_counter > max_swipes)
+    if is_expectation_reached || (attempt_counter > max_swipes)
       break
     else
-      perform_gesture "swipe_#{direction}"
+      swipe(direction)
       attempt_counter += 1
-      sleep 1
     end
   end
 
-  assert_true_custom(occurrences == expected_occurrences,
+  assert_true_custom(is_expectation_reached,
     "During #{attempt_counter} swipes, found '#{occurrences}' occurrences templates '#{File.basename(template_path)}' on the screen." +
-        " But expected '#{expected_occurrences}'. Check report folder '#{@report_path}' to details.")
-
+        " Check report folder '#{@report_path}' to details.")
+  # remove_file_if_exist(res_image_path) if is_expectation_reached
 end
 
 def tap_on_screen(x, y)
@@ -652,42 +670,12 @@ def press_back_button_custom(occurrences = 1)
   end
 end
 
-def swipe_down(occurrences = 1)
-  logc("method: '#{__method__}', params: '#{occurrences}'")
+def swipe(direction, occurrences = 1)
+  logc("method: '#{__method__}', params: '#{direction}', '#{occurrences}'")
 
   while occurrences > 0 do
-    perform_gesture "swipe_down"
-    sleep 2
-    occurrences -= 1
-  end
-end
-
-def swipe_left(occurrences = 1)
-  logc("method: '#{__method__}', params: '#{occurrences}'")
-
-  while occurrences > 0 do
-    perform_gesture "swipe_left"
-    sleep 2
-    occurrences -= 1
-  end
-end
-
-def swipe_right(occurrences = 1)
-  logc("method: '#{__method__}', params: '#{occurrences}'")
-
-  while occurrences > 0 do
-    perform_gesture "swipe_right"
-    sleep 2
-    occurrences -= 1
-  end
-end
-
-def swipe_up(occurrences = 1)
-  logc("method: '#{__method__}', params: '#{occurrences}'")
-
-  while occurrences > 0 do
-    perform_gesture "swipe_up"
-    sleep 2
+    perform_gesture("swipe_#{direction}")
+    sleep 1
     occurrences -= 1
   end
 end

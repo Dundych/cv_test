@@ -14,6 +14,7 @@ unless defined? LAST_CONSTANT
   ### Template images
   TEMPLATES = {
       "menu btn" => "menu_btn",
+      "app search field" => "app_search_field",
 
       # gmaps app
       "gmaps app icon" => "gmaps/app_icon",
@@ -24,6 +25,18 @@ unless defined? LAST_CONSTANT
       "gmaps satelite btn" => "gmaps/satelite_btn",
       "gmaps shema btn" => "gmaps/shema_btn",
       "gmaps traffic btn" => "gmaps/traffic_btn",
+
+      # gfit app
+      "gfit app icon" => "gfit/app_icon.png",
+      "gfit ok activ bottom" => "gfit/ok_activ_bottom.png",
+      "gfit ok activ top" => "gfit/ok_activ_top.png",
+      "gfit ok cardio bottom" => "gfit/ok_cardio_bottom.png",
+      "gfit ok cardio top" => "gfit/ok_cardio_top.png",
+      "gfit ok steps day bar" => "gfit/ok_steps_day_bar.png",
+      "gfit steps bar chart" => "gfit/steps_bar_chart.png",
+      "gfit main btn" => "gfit/main_btn.png",
+      "gfit log btn" => "gfit/log_btn.png",
+      "gfit profile btn" => "gfit/profile_btn.png",
 
       # gboard app
       "gboard search btn" => "gboard/search_btn"

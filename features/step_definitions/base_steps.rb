@@ -84,3 +84,9 @@ Then(/^I tap on template "([^"]*)"( if template exist)?$/) do |template_name, is
   template_file_path = eval_template_name_str_to_file_path(template_name)
   tap_template_on_the_screen(template_file_path, 0, is_strict.to_s.empty?)
 end
+
+
+When(/^I swipe (up|down|left|right)(?: (\d+) time(?:s)?)?$/) do |direction, occurrences|
+  occurrences = occurrences.nil? ? 1 : occurrences.to_i
+  swipe(direction, occurrences)
+end
