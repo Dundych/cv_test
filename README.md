@@ -1,10 +1,10 @@
 # CV based test faramework
 
 > The test project shows how to use computer vision to find
-> and manipulate objects on the screen. The main script
-> "scripts/find_objs_on_img.py" does all cv work. The rest of
-> ruby code is wrapper, for cucumber demo to easy use cv on
-> mobile testing. (Android)
+> and manipulate objects on the screen. The main scripts
+> "scripts/find_templates_on_img.py", "scripts/find_objs_on_img.py"
+> do all cv work. The rest of ruby code is wrapper,
+> for cucumber demo to easy use cv on mobile testing. (Android)
 
 ## How to run examples. Local 
 
