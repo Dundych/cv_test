@@ -2,6 +2,8 @@
 Feature: CV Samples
 
   @location
+  @k_39
+  @fp
   Scenario: Location Office Intellias Kyrylivska 39
     Given I enable location services
     When I press home button
@@ -18,8 +20,8 @@ Feature: CV Samples
     Then I wait 20 seconds to 1 object "location intellias kyrylivska 39" exist on the screen
 
   @location
-  @failed
-  Scenario: Failed Location Office Intellias Kyrylivska 39
+  @k_15
+  Scenario: Failed Location Office Intellias Kyrylivska 15
     Given I enable location services
     When I press home button
     And I wait for template "menu btn" on the screen
@@ -32,7 +34,7 @@ Feature: CV Samples
     And I tap on template "gmaps empty search field"
     When I enter text "Intellias Kyrylivska 15/1"
     And I tap on template "gboard search btn"
-    Then I wait 20 seconds to 1 object "location intellias kyrylivska 39" exist on the screen
+    Then I wait 20 seconds to 1 object "location intellias kyrylivska 15" exist on the screen
 
   @steps
   Scenario: Steps Number Of Active Days For The Last 7 Days
@@ -59,6 +61,6 @@ Feature: CV Samples
     When I enter text "google"
     And I wait for template "gfit app icon" on the screen
     Then I tap on template "gfit app icon"
-    And I swipe up 2 times
+    And I swipe up 5 times
     Then I see that I have done my "cardio" day plan
-    And I see that I have done my "activity" day plan
+    And I see that I have not done my "activity" day plan
