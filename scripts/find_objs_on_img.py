@@ -120,7 +120,7 @@ for pt in sparsed_points:
     # Store all the good matches as per Lowe's ratio test.
     good_matches = []
     for m,n in matches:
-        if m.distance < 0.7*n.distance:
+        if m.distance < 0.75*n.distance:
             good_matches.append(m)
 
     # Sort them in the order of their distance.
@@ -135,14 +135,14 @@ for pt in sparsed_points:
             common_good_matches.append(good_match)
 
     # Make decision. and save result to list
-    # To keep sparsed point - We should have at least 3 common points and more or equal than half of good matches
+    # To keep sparsed point - We should have at least 3 common points and more or equal than 20% of all matches
     res_dict = {
                     'point': pt,
                     'matches': matches,
                     'good_matches': good_matches,
                     'common_good_matches': common_good_matches
                 }
-    if len(common_good_matches) >= 3 and len(common_good_matches) >= len(good_matches)*0.55:
+    if len(common_good_matches) >= 3 and len(common_good_matches) >= 0.2*len(matches):
         accepted_points.append(res_dict)
     else:
         rejected_points.append(res_dict)

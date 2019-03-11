@@ -3,19 +3,21 @@ FROM ubuntu:xenial
 #install packages
 RUN apt-get update -y && \
     apt-get install -y \
+    vim \
+    nano \
     curl \
     wget \
     jq \
-    libjpeg-dev \
-    libmagickwand-dev \
+    libjpeg-dev=8c-2ubuntu8 \
+    libmagickwand-dev=8:6.8.9.9-7ubuntu5.13 \
     libpng-dev \
-    openjdk-8-jdk \
+    openjdk-8-jdk=8u191-b12-2ubuntu0.16.04.1 \
     p7zip \
     p7zip-full \
-    python-pip \
-    ruby \
-    ruby-dev \
-    sudo
+    python-pip=8.1.1-2ubuntu0.4 \
+    ruby=1:2.3.0+1 \
+    ruby-dev=1:2.3.0+1 \
+    sudo=1.8.16-0ubuntu1.5
 
 #Install bundler gem
 RUN gem install bundler

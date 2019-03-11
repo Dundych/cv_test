@@ -147,7 +147,8 @@ end
 # @Param: [String] 'image_path' - full path to main image
 # @Param: [String] 'output_path' - path to save result image. Default is '' (result won't saved)
 # @Param: [Number<Float>] 'threshold' -Threshold ratio (0.01 - 1) Default 0.65
-# @Return: [Hash] 'res' {"found" => 2,
+# @Return: [Hash] 'res' {"template_size" => [35, 36],
+#                        "found" => 2,
 #                        "threshold" => 0.65,
 #                        "accepted_values" => [0.7, 0.8],
 #                        "min" => 0.7,
@@ -176,7 +177,8 @@ def find_templates_on_img(template_path, image_path, output_path = '', threshold
   logc("Result of exec python script:\n     #{shell_exec_result}")
 
 
-  res_hash = {"found" => nil,
+  res_hash = {"template_size" => nil,
+              "found" => nil,
               "threshold" => nil,
               "accepted_values" => nil,
               "min" => nil,
@@ -185,6 +187,12 @@ def find_templates_on_img(template_path, image_path, output_path = '', threshold
               "point_clouds" => nil,
               "point_clouds_coords" => nil,
               "rectangle_centers" => nil}
+
+  # Parse output to get 'template_size'
+  match_size = shell_exec_result.match(/^Template size\(h, w\): '(\d+), (\d+)'\.$/)
+  assert_false_custom(match_size.nil?,
+                      "Script should always output 'Template size' info")
+  res_hash["template_size"] = [match_size.captures[0].to_i, match_size.captures[1].to_i]
 
   # Parse output to get 'found'
   match_found = shell_exec_result.match(/^Found: '(\d+)'\.$/)

@@ -3,7 +3,6 @@ Feature: CV Samples
 
   @location
   @k_39
-  @fp
   Scenario: Location Office Intellias Kyrylivska 39
     Given I enable location services
     When I press home button
@@ -32,7 +31,7 @@ Feature: CV Samples
     And I tap on template "gmaps clear search field btn" if template exist
     And I wait for template "gmaps empty search field" on the screen
     And I tap on template "gmaps empty search field"
-    When I enter text "Intellias Kyrylivska 15/1"
+    When I enter text "Kyrylivska 15"
     And I tap on template "gboard search btn"
     Then I wait 20 seconds to 1 object "location intellias kyrylivska 15" exist on the screen
 

@@ -74,6 +74,7 @@ for pt in sparsed_points:
     sparsed_rectangle_centers.append(rectangle_center)
 
 print( "Done with processing template '{0}' on image '{1}'.".format(os.path.basename(template_path), os.path.basename(image_path)) )
+print( "Template size(h, w): '{0}, {1}'.".format(h, w) )
 print( "Found: '{0}'.".format(len(points)) )
 print( "Threshold: '{0}'.".format(threshold) )
 if len(vals) > 0:
