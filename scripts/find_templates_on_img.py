@@ -48,8 +48,7 @@ template = cv2.imread(template_path)
 h, w = template.shape[:2] #Size of template
 
 result = cv2.matchTemplate(image, template, cv2.TM_CCOEFF_NORMED) # Use 'normed' method to easy choose a threshold
-loc = np.where(result >= threshold)
-
+loc = np.where(result >= threshold) # filter by threshold
 points = zip(*loc[::-1]) # Switch collumns and rows and get matched points
 
 #  Save vals of matched points
@@ -58,6 +57,10 @@ vals = []
 for pt in points:
     cv2.rectangle(image, pt, (pt[0] + w, pt[1] + h), (0, 0, 255), 2)
     vals.append(result[pt[1]][pt[0]])
+
+#  Sort points based on descending values from vals array
+#   it allows get better results from sparsing points method
+points = [p for p, _ in reversed(sorted(zip(points,vals), key=lambda pair: pair[1]))]
 
 #  Radius is a distanse between points to deside that points are equal. Use as radius 50% of min side of template
 radius = min([h, w]) * 0.5

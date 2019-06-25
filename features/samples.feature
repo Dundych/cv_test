@@ -14,13 +14,13 @@ Feature: CV Samples
     And I tap on template "gmaps clear search field btn" if template exist
     And I wait for template "gmaps empty search field" on the screen
     And I tap on template "gmaps empty search field"
-    When I enter text "Intellias Kyrylivska 39"
+    When I enter text "Intellias Kyiv Kyrylivska 39"
     And I tap on template "gboard search btn"
-    Then I wait 20 seconds to 1 object "location intellias kyrylivska 39" exist on the screen
+    Then I wait 20 seconds to 1 object "location intellias kyrylivska 15" exist on the screen
 
   @location
   @k_15
-  Scenario: Failed Location Office Intellias Kyrylivska 15
+  Scenario: Location Office Intellias Kyrylivska 15
     Given I enable location services
     When I press home button
     And I wait for template "menu btn" on the screen
@@ -31,7 +31,7 @@ Feature: CV Samples
     And I tap on template "gmaps clear search field btn" if template exist
     And I wait for template "gmaps empty search field" on the screen
     And I tap on template "gmaps empty search field"
-    When I enter text "Kyrylivska 15"
+    When I enter text "Kyiv Kyrylivska 15/1"
     And I tap on template "gboard search btn"
     Then I wait 20 seconds to 1 object "location intellias kyrylivska 15" exist on the screen
 
@@ -62,4 +62,4 @@ Feature: CV Samples
     Then I tap on template "gfit app icon"
     And I swipe up 5 times
     Then I see that I have done my "cardio" day plan
-    And I see that I have not done my "activity" day plan
+    And I see that I have done my "activity" day plan

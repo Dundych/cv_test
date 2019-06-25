@@ -75,11 +75,15 @@ offset = radius * 0.5
 
 #  Find matches and select results above threshold
 result = cv2.matchTemplate(image, query, cv2.TM_CCOEFF_NORMED) # Use 'normed' method to easy choose a threshold from 0 to 1
-loc = np.where(result >= threshold)
+loc = np.where(result >= threshold) # filter by threshold
 points = zip(*loc[::-1]) # Get matched points (note! - Remember to switch collumns and rows to get x(w),y(h))
 
 #  Save vals of matched points
 vals = [ result[pt[1]][pt[0]] for pt in points ]
+
+#  Sort points based on descending values from vals array
+#   it allows get better results from sparsing points method
+points = [p for p, _ in reversed(sorted(zip(points,vals), key=lambda pair: pair[1]))]
 
 #  Sparce points to reduce matches
 sparsed_points = sparse_subset(points, radius)
