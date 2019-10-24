@@ -16,7 +16,7 @@ Feature: CV Samples
     And I tap on template "gmaps empty search field"
     When I enter text "Intellias Kyiv Kyrylivska 39"
     And I tap on template "gboard search btn"
-    Then I wait 20 seconds to 1 object "location intellias kyrylivska 15" exist on the screen
+    Then I wait 20 seconds to 1 object "location intellias kyrylivska 39" exist on the screen
 
   @location
   @k_15
@@ -47,7 +47,7 @@ Feature: CV Samples
     Then I tap on template "gfit app icon"
     And I tap on template "gfit main btn" if template exist
     And I scroll to template "gfit steps bar chart" on the screen
-    And I see that for the last 7 days I had at least 3 active days
+    And I see that for the last 7 days I had at least 2 active days
 
   @activity
   @cardio
@@ -62,4 +62,4 @@ Feature: CV Samples
     Then I tap on template "gfit app icon"
     And I swipe up 5 times
     Then I see that I have done my "cardio" day plan
-    And I see that I have done my "activity" day plan
+    And I see that I have not done my "activity" day plan

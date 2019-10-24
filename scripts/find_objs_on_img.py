@@ -118,8 +118,8 @@ for pt in sparsed_points:
     kp1, des1 = det.detectAndCompute(img1, None)
     kp2, des2 = det.detectAndCompute(img2, None)
 
-    # Match descriptors.
-    matches = bf.knnMatch(des1,des2,k=2)
+    # Match descriptors if enough points found
+    matches = bf.knnMatch(des1,des2,k=2) if (len(kp1) >= 3 and len(kp2) >= 3) else []
 
     # Store all the good matches as per Lowe's ratio test.
     good_matches = []
