@@ -21,6 +21,31 @@ When(/^I enable location services$/) do
   sleep 5
 end
 
+Then(/^On gmail app I configure map view$/) do
+  step %Q{I wait for template "gmaps layers btn" on the screen}
+  step %Q{I tap on template "gmaps layers btn"}
+
+  # step %Q{I wait for template "gmaps relief btn" on the screen}
+  # step %Q{I tap on template "gmaps relief btn"}
+
+  # step %Q{I wait for template "gmaps shema btn" on the screen}
+  # step %Q{I tap on template "gmaps shema btn"}
+
+  # step %Q{I wait for template "gmaps pub transp btn" on the screen}
+  # step %Q{I tap on template "gmaps pub transp btn"}
+
+  # step %Q{I wait for template "gmaps traffic btn" on the screen}
+  # step %Q{I tap on template "gmaps traffic btn"}
+
+  step %Q{I wait for template "gmaps street view btn" on the screen}
+  step %Q{I tap on template "gmaps street view btn"}
+
+  step %Q{I wait for template "gmaps 3d btn" on the screen}
+  step %Q{I tap on template "gmaps 3d btn"}
+
+  step %Q{I press back button}
+end
+
 Then(/^I take screenshot$/) do
   sleep(1)
   prepare_screenshot
@@ -40,11 +65,11 @@ Then(/^I wait (\d+) seconds to (\d+) object(?:s)? "([^"]*)" exist on the screen?
   query_image_name = query_image_name.to_s.downcase
 
   query_image_file_path = eval_query_name_str_to_file_path(query_image_name)
-  occurrences = wait_objects_on_the_screen(expected_occurrences, query_image_file_path, timeout)["rectangle_centers"].size.to_i
+  res = wait_objects_on_the_screen(expected_occurrences, query_image_file_path, timeout)
 
-  assert_true_custom(occurrences == expected_occurrences,
-                     "During #{timeout}s, found '#{occurrences}' occurrences objects '#{File.basename(query_image_file_path)}' on the screen." +
-                         " But expected '#{expected_occurrences}'. Check report folder '#{@report_path}' to details.")
+  assert_true_custom(res,
+                     "During #{timeout}s, could not find '#{expected_occurrences}' occurrences objects '#{File.basename(query_image_file_path)}' on the screen." +
+                         " Check report folder '#{@report_path}' to details.")
 end
 
 Then(/^I wait for object "([^"]*)" on the screen$/) do |query_name|
@@ -56,11 +81,11 @@ Then(/^I wait (\d+) seconds to (\d+) template(?:s)? "([^"]*)" exist on the scree
   template_name = template_name.to_s.downcase
 
   template_file_path = eval_template_name_str_to_file_path(template_name)
-  occurrences = wait_templates_on_the_screen(expected_occurrences, template_file_path, timeout)["point_clouds"].to_i
+  res = wait_templates_on_the_screen(expected_occurrences, template_file_path, timeout)
 
-  assert_true_custom(occurrences == expected_occurrences,
-                     "During #{timeout}s, found '#{occurrences}' occurrences templates '#{File.basename(template_file_path)}' on the screen." +
-                         " But expected '#{expected_occurrences}'. Check report folder '#{@report_path}' to details.")
+  assert_true_custom(res,
+                     "During #{timeout}s, could not find '#{expected_occurrences}' occurrences templates '#{File.basename(template_file_path)}' on the screen." +
+                         " Check report folder '#{@report_path}' to details.")
 end
 
 Then(/^I wait for template "([^"]*)" on the screen$/) do |template_name|

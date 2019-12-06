@@ -53,7 +53,7 @@ After do |scenario|
   remove_screenshot_file
 
   if scenario.failed?
-    prepare_screenshot("#{@scenario_name.gsub(" ", "_")}_failed", false, false)
+    prepare_screenshot("#{@scenario_name.gsub(" ", "_")}_failed.png", false, false)
   end
 
 end

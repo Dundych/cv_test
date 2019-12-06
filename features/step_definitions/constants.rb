@@ -21,10 +21,13 @@ unless defined? LAST_CONSTANT
       "gmaps clear search field btn" => "gmaps/clear_search_field_btn",
       "gmaps empty search field" => "gmaps/empty_search_field",
       "gmaps layers btn" => "gmaps/layers_btn",
-      "gmaps pub transp btn" => "gmaps/pub_transp_btn",
       "gmaps satelite btn" => "gmaps/satelite_btn",
       "gmaps shema btn" => "gmaps/shema_btn",
+      "gmaps relief btn" => "gmaps/relief_btn",
       "gmaps traffic btn" => "gmaps/traffic_btn",
+      "gmaps pub transp btn" => "gmaps/pub_transp_btn",
+      "gmaps 3d btn" => "gmaps/3d_btn",
+      "gmaps street view btn" => "gmaps/street_view_btn",
 
       # gfit app
       "gfit app icon" => "gfit/app_icon",

@@ -260,150 +260,6 @@ def find_templates_on_img(template_path, image_path, output_path = '', threshold
   return res_hash
 end
 
-# Obsolete
-# Exec method 'find_templates_on_img', check result, and calculate threshold value to reduce noise,
-#   and 1-st (false positives) 2-nd (true negatives) kind errors.
-#   We assume, that:
-#     - image does not contains templates if method found '0' templates with 'threshold' ~ '0.6',
-#     - correct number of templates that contains image, can be located with  threshold,
-#         that give density of 'found' / 'point_clouds' < '80' - it means, that for every template,
-#         we have < '80' points for each cloud in range of 'threshold' '0.6 - 0.8' with steps '0.02'
-# @Param: [String] 'template_path' - full path to template image
-# @Param: [String] 'image_path' - full path to main image
-# @Param: [String] 'output_path' - path to save result image. Default is '' (result won't saved)
-# @Return: [Hash] 'res' find_templates_on_img
-def xxx_find_templates_on_img_with_dynamic_threshold(template_path, image_path, output_path = '')
-  logc("method: #{__method__}, params: '#{template_path}', #{image_path}, #{output_path}")
-
-  ts = Time.now
-
-  calculated_threshold = nil
-  current_density = nil
-
-  min_threshold = 0.6
-  max_threshold = 0.8
-  threshold_with_no_results = max_threshold
-  threshold_step = 0.02
-  accepted_density = 80.0
-
-
-  res = find_templates_on_img(template_path, image_path, output_path)
-
-  # case of 'not found'
-  # decrease threshold to ensure that image does not contains templates or find templates
-  if res["found"] == 0
-    logc("Enter to cycle of decreasing threshold to ensure that image does not contains templates or find templates")
-    while true
-      logc("Cycle of decreasing threshold")
-
-      threshold_with_no_results = res["threshold"]
-      previous_threshold = res["threshold"]
-      next_threshold = previous_threshold - threshold_step
-
-      logc("Can't find templates on the screen with threshold '#{threshold_with_no_results}'." +
-               " Decreasing threshold to '#{next_threshold}'")
-
-      if next_threshold <= min_threshold
-        calculated_threshold = previous_threshold
-        logc("Next threshold value '#{next_threshold}' smaller or equal than min threshold '#{min_threshold}'." +
-                 " End calculation with threshold value '#{calculated_threshold}'.")
-        break
-      end
-
-      res = find_templates_on_img(template_path, image_path, nil, next_threshold)
-      if res["found"] != 0
-        logc("Found '#{res["found"]}' templates on the screen with threshold '#{next_threshold}'" +
-                 " Exit from 'decreasing threshold' cycle to function to find accepted level of density")
-        break
-      end
-    end
-  end
-
-  # case of 'found' or 'calculated_threshold' is still 'nil'
-  # increase threshold to reach 'accepted_density' or 'max_threshold' or 'threshold_with_no_results'
-  if calculated_threshold.nil? && !res["point_clouds"].to_s.empty?
-    logc("Enter to cycle of increasing threshold to" +
-             " reach 'accepted_density' or 'max_threshold' or 'threshold_with_no_results'")
-    while true
-      logc("Cycle of increasing threshold")
-
-      previous_threshold = res["threshold"]
-      current_density = res["found"].to_f / res["point_clouds"].to_f
-      next_threshold = previous_threshold + threshold_step
-
-      logc("Found '#{res["point_clouds"]}' point clouds." +
-               " Increasing threshold to '#{next_threshold}'")
-
-      if current_density <= accepted_density
-        calculated_threshold = previous_threshold
-        logc("Accepted density '#{accepted_density}' reached with value '#{current_density}'." +
-                 " End calculation with threshold value '#{calculated_threshold}'.")
-        break
-      end
-
-      if next_threshold >= threshold_with_no_results
-        calculated_threshold = previous_threshold
-        logc("Next threshold value '#{next_threshold}' greater or equal" +
-                 " than threshold with no results '#{threshold_with_no_results}'." +
-                 " End calculation with threshold value '#{calculated_threshold}'.")
-        break
-      end
-
-      if next_threshold >= max_threshold
-        calculated_threshold = previous_threshold
-        logc("Next threshold value '#{next_threshold}' greater or equal than  max threshold '#{max_threshold}'." +
-                 " End calculation with threshold value '#{calculated_threshold}'.")
-        break
-      end
-
-      res = find_templates_on_img(template_path, image_path, nil, next_threshold)
-
-      if res["point_clouds"].to_s.empty?
-        calculated_threshold = previous_threshold
-
-        logc("Next threshold value '#{next_threshold}' cause 'not found' result." +
-                 "Exit from 'increasing threshold' cycle with threshold value '#{calculated_threshold}'.")
-        break
-      end
-    end
-  end
-
-  assert_false_custom(calculated_threshold.nil?,
-                      "Function logic fail. After set of conditions threshold value must be found.")
-
-
-  logc("Threshold for template '#{File.basename(template_path)}' calculated." +
-           "\n  Accepted threshold value: '#{calculated_threshold}'." +
-           "\n  Calculated density: '#{current_density}'." +
-           "\n    Time spent for threshold calculating: #{(Time.now - ts)}s" +
-           "\n     In the end - Finding template with calculated threshold to return it")
-
-  if !res.nil? && (res["threshold"] == calculated_threshold)
-    # result with calculated threshold is already exist and saved in res variable
-    logc("Template with calculated threshold is already found and saved in 'res' variable. Return it")
-  else
-    # get result with calculated threshold
-    res = find_templates_on_img(template_path, image_path, output_path, calculated_threshold)
-  end
-
-  return res
-end
-
-# Obsolete
-# Take screenshot get number of occurrence template on it (calculate and use dynamic threshold)
-# @Param: [String] template_path - full path to template image
-# @Param: [String] output_path - path to save result image. Default is '' (result won't saved)
-# @Return: [Hash] res_of_finding
-def xxx_find_templates_on_the_screen(template_path, output_file_path = '')
-  logc("method: #{__method__}, params: '#{template_path}', #{output_file_path}")
-
-  screenshot_path = prepare_screenshot("screenshot.png", true, false)
-
-  res_of_finding = find_templates_on_img_with_dynamic_threshold(template_path, screenshot_path, output_file_path)
-
-  return res_of_finding
-end
-
 # Take screenshot get number of occurrence template on it (use strict threshold)
 # @Param: [String] template_path - full path to template image
 # @Param: [String] output_path - path to save result image. Default is '' (result won't saved)
@@ -447,42 +303,27 @@ def wait_templates_on_the_screen(expected_num_templates_on_screen, template_path
   logc("method: #{__method__}, params: #{expected_num_templates_on_screen}, #{template_path}," + 
     " #{timeout}, #{threshold_value} #{take_res_if_expect_fail}")
 
-  time_start = Time.now
-  time_end = time_start + timeout.to_i
-  logc("Checking will be ended at '#{time_end}'")
 
   res_image_path = File.join(@report_path,
                              "#{@scenario_name.to_s.gsub(" ", "_").downcase}" +
                              "_result_find_template_" +
                              "#{File.basename(template_path)}")
 
-  #wait for time_end reached OR expectation reached
-  res_of_finding = nil
-  occurrences = nil
-  attempt_counter = 1
-  while true
-    attempt_time = Time.now
-    logc("Attempt: '#{attempt_counter}', time: #{attempt_time}")
-    res_of_finding = find_templates_on_the_screen(template_path, res_image_path, threshold_value)
-    occurrences = res_of_finding["point_clouds"].to_i
 
-    if (occurrences == expected_num_templates_on_screen) || (attempt_time > time_end)
-      break
-    else
-      attempt_counter += 1
-      sleep 1
-    end
-  end
+res = wait_to_block_return_true(timeout) do
+  occ = find_templates_on_the_screen(template_path, res_image_path, threshold_value)["point_clouds"].to_i
+  occ == expected_num_templates_on_screen
+end
 
-  assert_false_custom(occurrences.nil? || res_of_finding.nil?,
-     "Error: template occurrences or res_of_finding on image can't be nil. Check find method")
+if res || !take_res_if_expect_fail
+  # remove_file_if_exist(res_image_path)
+else
+  logc("Fail expectation waiting templates on the screen." +
+         "\n     Image with matching result saved: '#{res_image_path}'.")
+end
 
-  logc("Occurrences found: #{occurrences}\n     Time spent to wait expected result: #{Time.now - time_start}")
+res
 
-  is_expectation_reached = (occurrences == expected_num_templates_on_screen)
-  # remove_file_if_exist(res_image_path) if is_expectation_reached || !take_res_if_expect_fail
-
-  return res_of_finding
 end
 
 # Exec python script 'find_obj_on_img.py' to get info about occurrence objects on image
@@ -549,42 +390,25 @@ def wait_objects_on_the_screen(expected_num_objects_on_screen, query_image_path,
   logc("method: #{__method__}, params: #{expected_num_objects_on_screen}, #{query_image_path}," + 
     " #{timeout}, #{take_res_if_expect_fail}")
 
-  time_start = Time.now
-  time_end = time_start + timeout.to_i
-  logc("Checking will be ended at '#{time_end}'")
-
   res_image_path = File.join(@report_path,
                              "#{@scenario_name.to_s.gsub(" ", "_").downcase}" +
                              "_result_find_object_" +
                              "#{File.basename(query_image_path)}")
 
-  #wait for time_end reached OR expectation reached
-  res_of_finding = nil
-  occurrences = nil
-  attempt_counter = 1
-  while true
-    attempt_time = Time.now
-    logc("Attempt: '#{attempt_counter}', time: #{attempt_time}")
-    res_of_finding = find_objects_on_the_screen(query_image_path, res_image_path)
-    occurrences = res_of_finding["rectangle_centers"].size.to_i
-
-    if (occurrences == expected_num_objects_on_screen) || (attempt_time > time_end)
-      break
-    else
-      attempt_counter += 1
-      sleep 1
-    end
+  res = wait_to_block_return_true(timeout) do
+    occ = find_objects_on_the_screen(query_image_path, res_image_path)["rectangle_centers"].size.to_i
+    occ == expected_num_objects_on_screen
   end
 
-  assert_false_custom(occurrences.nil? || res_of_finding.nil?,
-     "Error: object occurrences or res_of_finding on image can't be nil. Check find method")
+  if res || !take_res_if_expect_fail
+    # remove_file_if_exist(res_image_path)
+  else
+    logc("Fail expectation waiting objects on the screen." +
+             "\n     Image with matching result saved: '#{res_image_path}'.")
+  end
 
-  logc("Occurrences found: #{occurrences}\n     Time spent to wait expected result: #{Time.now - time_start}")
+  res
 
-  is_expectation_reached = (occurrences == expected_num_objects_on_screen)
-  # remove_file_if_exist(res_image_path) if is_expectation_reached || !take_res_if_expect_fail
-
-  return res_of_finding
 end
 
 # Wait until screen will contains  1 template, get it coordinates, and tap it
@@ -686,4 +510,35 @@ def swipe(direction, occurrences = 1)
     sleep 1
     occurrences -= 1
   end
+end
+
+# Custom wait method. Wait till block return true or "timeout" expired
+# @Param {Int} timeout to wait
+# @Block {Bool} block with expression
+# @Return {Bool} True if block returns true, or false after timeout if not
+def wait_to_block_return_true(timeout = 2)
+  logc("method: '#{__method__}', params: '#{timeout}', 'block'")
+  assert_true_custom(block_given?, "Error method calling. Block is not given.")
+
+  time_start = Time.now
+  time_end = time_start + timeout.to_i
+
+  res = false
+  while true do
+    attempt_time = Time.now
+    time_spent = (attempt_time - time_start).round(2)
+    time_left = (time_end - attempt_time).round(2)
+    res = yield
+    if res
+      logc("Result is 'true'. Time spent '#{time_spent}' sec. Exit loop.")
+      break
+    elsif time_left < 0
+      logc("Time is over. Result is still 'false'. Time spent '#{time_spent}' sec. Exit loop.")
+      break
+    else
+      logc("Wait to 'true' result. Time spent '#{time_spent}' sec. Time left '#{time_left}' sec")
+    end
+  end
+
+  res
 end
