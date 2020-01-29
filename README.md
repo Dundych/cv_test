@@ -11,18 +11,20 @@
 - Check if templates in "templates" folder is similar to your phone OS, theme and language. Change it for actual images, make sure you save the names
 - Setup Android env on PC (Java, Android SDK, ADB, etc)
 - Connect android device to PC via adb, get device id (eg: ZY223FFP4M)
-- Navigate to project root and run test by tag
+- Navigate to project root and install ruby and python modules
+```sh
+sudo bundle install && pip install -r requirements.txt;
+```
 
+- run test by tag
 ```sh
 $ cucumber features -v -t @cur DEVICE_ID=ZY223FFP4M
 ```
 
 - OR test any image manually
-
 ```sh
 $ python scripts/find_templates_on_img.py -t <template.png> -i <image.png> -o <result.png>
 ```
-
 ```sh
 $ python scripts/find_objs_on_img.py -q <query.png> -t <train.png> -o <result.png>
 ```
